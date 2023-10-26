@@ -69,7 +69,7 @@ class Rewards():
         action = idx[1][random_idx]
         return (state, action)
 
-    def choose_next_action(self, player, action_table):#choos the next action for the player based on the q-table and an action table
+    def choose_next_action(self, player, action_table):#choose the next action for the player based on the q-table and an action table
         # It implements an epsilon-greedy strategy, where the agent chooses a random action with probability epsilon_greedy or selects the action with the highest Q-value.
         q_table_options = np.multiply(self.q_table, action_table)
     
@@ -100,10 +100,8 @@ class Rewards():
         estimate_of_optimal_future_value = np.max(self.q_table * new_action_table)
         old_q_value = self.q_table[state, action]
         delta_q = self.lr * (reward + self.gamma * estimate_of_optimal_future_value - old_q_value)
-        
         self.max_expected_reward += reward
         
         # Update the Q table from the new action taken in the current state
         self.q_table[state, action] = old_q_value + delta_q
-        #print("update q table, state: {0}, action:{1}".format(state,action))
     

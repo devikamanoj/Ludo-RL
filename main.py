@@ -17,7 +17,7 @@ def epsilon_decay(epsilon, decay_rate, episode):
     return epsilon * np.exp(-decay_rate*episode)
 
 def start_teaching_ai_agent(episodes, no_of_players, epsilon, epsilon_decay_rate, lr, gamma):
-    
+
     # Houskeeping variables
     ai_player_winning_avg = [] # 0 for AI losing, 1 for AI winning
     epsilon_list = [] # val of e over episodes
@@ -62,13 +62,11 @@ def start_teaching_ai_agent(episodes, no_of_players, epsilon, epsilon_decay_rate
             if episode > 1:
                 board = g.render_environment()
                 cv2.imshow("Ludo Board", board)
-                cv2.waitKey(1)
+                cv2.waitKey(10)
                 
             if ai_player_1.ai_player_idx == player_i and piece_to_move != -1:
                 # if AI player moved, update reward
                 ai_player_1.reward(g.players, [piece_to_move])
-
-        
         if episode == 500:
             g.save_hist_video("game.mp4")
             
@@ -114,7 +112,6 @@ def start_teaching_ai_agent(episodes, no_of_players, epsilon, epsilon_decay_rate
 
 
 # FINAL AGENT PLAYING AGAINST 1,2 and 3 RANDOM PLAYERS
-
 learning_rate = 0.2
 gamma = 0.5
 epsilon = 0.9

@@ -45,9 +45,6 @@ class Action(Enum):
     UNSAFE_Die = 25  # Move to a field where opponent has 2 or more pieces
     UNSAFE_GoalZone = 26  # Move into goal zone
 
-
-
-
 class StateSpace():
 
     quarter_game_size = 13 # number of unsafe (white) cells for a player
