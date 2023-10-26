@@ -1,4 +1,3 @@
-
 import ludopy
 import matplotlib.pyplot as plt
 import numpy as np
@@ -6,19 +5,23 @@ import cv2
 from player import QLearningAgent
 
 
+# win rate of AI agent over a certain window of episodes is calculated using moving averages
 def movingaverage(interval, window_size):
     window= np.ones(int(window_size))/float(window_size)
+    # same convolution (product of moving windows) of interval and window
     return np.convolve(interval, window, 'same')
 
 def epsilon_decay(epsilon, decay_rate, episode):
+    # gradually reduce the level of exploration over time as the agent gains more experience
+    # higher e = more exploration
     return epsilon * np.exp(-decay_rate*episode)
 
 def start_teaching_ai_agent(episodes, no_of_players, epsilon, epsilon_decay_rate, lr, gamma):
     
     # Houskeeping variables
-    ai_player_winning_avg = []
-    epsilon_list = []
-    idx = []
+    ai_player_winning_avg = [] # 0 for AI losing, 1 for AI winning
+    epsilon_list = [] # val of e over episodes
+    idx = [] # ep indices
     ai_player_won = 0
 
     # Store data
@@ -40,8 +43,10 @@ def start_teaching_ai_agent(episodes, no_of_players, epsilon, epsilon_decay_rate
         g.reset()
         while not there_is_a_winner:
             (dice, move_pieces, player_pieces, enemy_pieces, player_is_a_winner,there_is_a_winner), player_i = g.get_observation()
-
+            
+            # move_pieces: pieces the player can move
             if len(move_pieces):
+                # AI player takes an action. If it is not AI, then move randomly (showing human interaction)
                 if ai_player_1.ai_player_idx == player_i:
                     piece_to_move = ai_player_1.update(g.players, move_pieces, dice)
                     if not piece_to_move in move_pieces:
