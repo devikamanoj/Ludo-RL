@@ -151,18 +151,22 @@ class StateSpace():
                 enemy_position = self.global_position(enemy_player_idx, enemy_piece_index)
                 enemy_local_position = self.local_position(enemy_player_idx, enemy_piece_index)
                 if enemy_local_position in player.pieces:
+                    # enemy and player at same cell - safe area
                     continue
                 if enemy_position > 53 or enemy_position == 0:
+                    # if enemies are in safe area, ignore - coloured strip and home pos
                     continue
                 if enemy_position in self.globe_positions_global or enemy_local_position in self.globe_positions_local:
                     die_list.append(enemy_position)
                     continue
                 if enemy_position in kill_list:
+                    # if the enemy position was already in the to-be-killed list, kill it and put in die list
                     die_list.append(enemy_position)
                     kill_list.remove(enemy_position)
                 else:
                     kill_list.append(enemy_position)
         enemyList = []
+        # add all the elements of kill and die list to enemylist
         enemyList.extend(kill_list)
         enemyList.extend(die_list)
         return (kill_list, die_list, enemyList)
@@ -186,8 +190,10 @@ class StateSpace():
             self.action_table_player.set_state(State.UNSAFE)
 
     def update_move_out_action(self, player, piece, dice):
+        # move out of the home
         if self.local_position(player, piece) == 0 and dice == 6:
             next_state = self.get_target_player_state(player, piece, dice).value
+            # if there is an enemy at the doorstep, it will be killed
             if self.get_global_position(player, 1) in self.enemyList:
                 self.update_action_table(player, Action(Action.HOME_Kill.value + next_state * 9), piece, 1)
             else:
@@ -197,6 +203,7 @@ class StateSpace():
 
     def update_move_dice_action(self, player, piece, dice):
         if self.local_position(player, piece) == 0:
+            # a token at home can move out only if they land a 6
             return False
         if self.local_position(player, piece) + dice <= 59:
             next_state = self.get_target_player_state(player, piece, dice).value
@@ -243,7 +250,6 @@ class StateSpace():
             if target_position == self.local_position(player, i):
                 next_state = self.get_target_player_state(player, piece, dice).value
                 self.update_action_table(player, Action(Action.HOME_Protect.value + next_state * 9), piece, 1)
-                # self.update_action_table(player, Action.Protect,piece,1, dice)
                 return True
         return False
 
@@ -264,7 +270,6 @@ class StateSpace():
         ):
             next_state = self.get_target_player_state(player, piece, dice).value
             self.update_action_table(player, Action(Action.HOME_Kill.value + next_state * 9), piece, 1)
-            # self.update_action_table(player,Action.Kill,piece,1)
             return True
         return False
 
@@ -334,6 +339,7 @@ class StateSpace():
         (killList, dieList, enemyList) = self.get_enemy_list(player)
         self.enemyList = enemyList
         for piece in pieces_to_move:
+            # in decreasing order of priority
             self.set_player_state(current_player, piece)
             if self.update_move_out_action(current_player, piece, dice):
                 continue
