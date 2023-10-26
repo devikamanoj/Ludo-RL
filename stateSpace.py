@@ -8,7 +8,7 @@ from ludopy.player import Player
 class State(Enum):
     HOME = 0  # state in which the token is home, which also is the starting position.
     SAFE = 1  # state in which the token has reached goal.
-    UNSAFE = 2  # state where the token is safe but not at home or goal.
+    UNSAFE = 2  # state where the token is unsafe but not at home or goal.
 
 
 class Action(Enum):
@@ -23,7 +23,7 @@ class Action(Enum):
     HOME_Die = 7  # Move to a field where opponent has 2 or more pieces
     HOME_GoalZone = 8  # Move into goal zone
 
-    # Save
+    # Safe
     SAFE_MoveOut = 9  # Moving token out of start
     SAFE_MoveDice = 10  # Moving eyes of dice
     SAFE_Goal = 11  # Move into goal position
@@ -34,7 +34,7 @@ class Action(Enum):
     SAFE_Die = 16  # Move to a field where opponent has 2 or more pieces
     SAFE_GoalZone = 17  # Move into goal zone
 
-    # Unsave
+    # Unsafe
     UNSAFE_MoveOut = 18  # Moving token out of start
     UNSAFE_MoveDice = 19  # Moving eyes of dice
     UNSAFE_Goal = 20  # Move into goal position
@@ -50,12 +50,12 @@ class Action(Enum):
 
 class StateSpace():
 
-    quarter_game_size = 13
+    quarter_game_size = 13 # number of unsafe (white) cells for a player
     star_positions = [5, 12, 18, 25, 31, 38, 44, 51]
     globe_positions_global = [9, 22, 35, 48]
-    globe_positions_local = [1]
+    globe_positions_local = [1] # local => wrt current player
     globe_positions_enemy_local = []
-    danger_positions_local = [14, 27, 40]
+    danger_positions_local = [14, 27, 40] # the cell right after home of other players (high chance of getting killed)
     local_player_position = [Player(), Player(), Player(), Player()]
     global_player_position = [Player(), Player(), Player(), Player()]
     action_table_player = ActionTable(len(State), len(Action))
@@ -83,10 +83,13 @@ class StateSpace():
                 if piece == 0:
                     self.global_player_position[idx_player].pieces[idx_piece] = 0
                 elif piece == 59:
+                    #home
                     self.global_player_position[idx_player].pieces[idx_piece] = 59
                 else:
+                    # move forward
                     self.global_player_position[idx_player].pieces[idx_piece] = (piece + (self.quarter_game_size * idx_player)) % 52
                 idx_piece = idx_piece + 1
+            # next player
             idx_player = idx_player + 1
 
     def get_global_position(self, player_idx, local_position):
@@ -98,14 +101,17 @@ class StateSpace():
             return (local_position + (self.quarter_game_size * player_idx)) % 52
 
     def check_if_piece_safe(self, player, piece):
+        # check if there are more than one piece at that location. if yes, then the piece is protected
         is_protected = len(np.where(self.local_player_position[player].pieces == self.local_position(player, piece))[0]) > 1
         return self.check_if_piece_is_safe_at_location(self.local_position(player, piece), self.global_position(player, piece), is_protected)
 
     def check_if_piece_is_safe_at_location(self, local_postion, global_position, is_protected):
         if global_position in self.globe_positions_global or local_postion in self.globe_positions_local:
+            # in safe spots
             return True
         # check if piece is in goal zone
         if local_postion >= 53:
+            # in the coloured area - protected
             return True
         if local_postion != 0 and local_postion != 59 and is_protected:
             return True
@@ -113,16 +119,20 @@ class StateSpace():
 
     def check_if_piece_is_in_danger_at_location(self, local_postion, global_postion):
         if local_postion > 53 or local_postion == 1:
+            # coloured cells - protected
             return False
 
         if global_postion in self.globe_positions_global:
+            # safe spots
             return False
 
         if local_postion in self.danger_positions_local:
+            # danger spots 
             return True
         danger_positions = np.empty
 
         for i in range(1, 6):
+            # shows the danger positions if the piece is moved by i
             danger_positions = np.append(danger_positions, np.add(self.enemyList, i))
         if global_postion in danger_positions:
             return True
@@ -136,6 +146,7 @@ class StateSpace():
         die_list = []
         self.enemy_list = []
         for enemy_player_idx in range(len(self.global_player_position)):
+            # for all the enemies in the game
             for enemy_piece_index in range(len(self.global_player_position[enemy_player_idx].pieces)):
                 enemy_position = self.global_position(enemy_player_idx, enemy_piece_index)
                 enemy_local_position = self.local_position(enemy_player_idx, enemy_piece_index)
