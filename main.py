@@ -50,8 +50,10 @@ def start_teaching_ai_agent(episodes, no_of_players, epsilon, epsilon_decay_rate
                 if ai_player_1.ai_player_idx == player_i:
                     piece_to_move = ai_player_1.update(g.players, move_pieces, dice)
                     if not piece_to_move in move_pieces:
+                        # to not allow any moves
                         g.render_environment()
                 else:
+                    # emulate human movement by making moves random
                     piece_to_move = move_pieces[np.random.randint(0, len(move_pieces))]
             else:
                 piece_to_move = -1
@@ -63,6 +65,7 @@ def start_teaching_ai_agent(episodes, no_of_players, epsilon, epsilon_decay_rate
                 cv2.waitKey(1)
                 
             if ai_player_1.ai_player_idx == player_i and piece_to_move != -1:
+                # if AI player moved, update reward
                 ai_player_1.reward(g.players, [piece_to_move])
 
         
@@ -91,19 +94,20 @@ def start_teaching_ai_agent(episodes, no_of_players, epsilon, epsilon_decay_rate
             print("Episode: ", episode)
             print(f"Win rate: {np.round(win_rate_percentage,1)}%")
     
+        # append and reset max expected reward
         max_expected_return_list.append(ai_player_1.q_learning.max_expected_reward)
         ai_player_1.q_learning.max_expected_reward = 0
 
 
     # Moving averages
     window_size = 20
-    cumsum_vec = np.cumsum(np.insert(win_rate_list, 0, 0)) 
-    win_rate_ma = (cumsum_vec[window_size:] - cumsum_vec[:-window_size]) / window_size
+    cumsum_vec = np.cumsum(np.insert(win_rate_list, 0, 0)) # sum of all win rates up to a specific position in the list
+    win_rate_ma = (cumsum_vec[window_size:] - cumsum_vec[:-window_size]) / window_size # cumulative sum of data points in moving average
 
-    cumsum_vec = np.cumsum(np.insert(max_expected_return_list, 0, 0)) 
+    cumsum_vec = np.cumsum(np.insert(max_expected_return_list, 0, 0)) # cumulative sum of max expectations
     max_expected_return_list_ma = (cumsum_vec[window_size:] - cumsum_vec[:-window_size]) / window_size
     
-    moving_average_list = [0] * window_size
+    moving_average_list = [0] * window_size 
     win_rate_ma = moving_average_list + win_rate_ma.tolist()
     max_expected_return_list_ma = moving_average_list + max_expected_return_list_ma.tolist()
     return win_rate_list, win_rate_ma, epsilon_list, max_expected_return_list, max_expected_return_list_ma
