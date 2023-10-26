@@ -96,7 +96,8 @@ class Rewards():
 
         # Q-learning equation
         reward = self.rewards_table[action]
-        # Q-learning
+        
+        # new q(s,a) = q(s,a) + lr*[R(s,a) + gamma*maxQ'(s',a') - Q(s,a)]
         estimate_of_optimal_future_value = np.max(self.q_table * new_action_table)
         old_q_value = self.q_table[state, action]
         delta_q = self.lr * (reward + self.gamma * estimate_of_optimal_future_value - old_q_value)
