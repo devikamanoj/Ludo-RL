@@ -1,12 +1,9 @@
-import os
-import sys
+
 import ludopy
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
-import copy
 from player import QLearningAgent
-import csv
 
 
 def movingaverage(interval, window_size):
@@ -64,7 +61,7 @@ def start_teaching_ai_agent(episodes, no_of_players, epsilon, epsilon_decay_rate
                 ai_player_1.reward(g.players, [piece_to_move])
 
         
-        if episode == 200:
+        if episode == 500:
             g.save_hist_video("game.mp4")
             
         new_epsilon_after_decay = epsilon_decay(epsilon=epsilon, decay_rate=epsilon_decay_rate,episode=episode)
@@ -100,18 +97,11 @@ def start_teaching_ai_agent(episodes, no_of_players, epsilon, epsilon_decay_rate
 
     cumsum_vec = np.cumsum(np.insert(max_expected_return_list, 0, 0)) 
     max_expected_return_list_ma = (cumsum_vec[window_size:] - cumsum_vec[:-window_size]) / window_size
-
-
     
     moving_average_list = [0] * window_size
     win_rate_ma = moving_average_list + win_rate_ma.tolist()
     max_expected_return_list_ma = moving_average_list + max_expected_return_list_ma.tolist()
-    
-    
     return win_rate_list, win_rate_ma, epsilon_list, max_expected_return_list, max_expected_return_list_ma
-
-    
-    
 
 
 # FINAL AGENT PLAYING AGAINST 1,2 and 3 RANDOM PLAYERS
@@ -121,21 +111,25 @@ gamma = 0.5
 epsilon = 0.9
 epsilon_decay_rate = 0.05
 episodes = 500
-
+no_of_players = 3
+# no_of_players = np.random.randint(1,4)
 
 # Start teaching the agent
-win_rate_list, win_rate_ma, epsilon_list, max_expected_return_list, max_expected_return_list_ma = start_teaching_ai_agent(episodes, 4, epsilon, epsilon_decay_rate, learning_rate, gamma)
-
+win_rate_list, win_rate_ma, epsilon_list, max_expected_return_list, max_expected_return_list_ma = start_teaching_ai_agent(episodes, no_of_players, epsilon, epsilon_decay_rate, learning_rate, gamma)
 
 # Plot win rates against opponents
 fig, axs = plt.subplots(1)
 axs.set_title("Win Rate against different number of opponents")
 axs.set_xlabel('Episodes')
 axs.set_ylabel('Win Rate %')
-axs.plot(win_rate_list, color='tab:red')
-axs.legend(['1 Opponent','2 Opponents', '3 Opponents'])
-
-
+axs.plot(win_rate_list)
+if(no_of_players==4):
+    axs.set_title(['Win Rate against 3 opponents'])
+elif(no_of_players==3):
+    axs.set_title(['Win Rate against 2 opponents'])
+else:
+    axs.set_title(['Win Rate against 1 opponent'])
+    
 # Plot epsilon decay
 fig, axs = plt.subplots(1)
 axs.set_title("Epilson Decay")
@@ -143,6 +137,5 @@ axs.set_xlabel('Episodes')
 axs.set_ylabel('Epsilon')
 axs.plot(epsilon_list, color='tab:red')
 axs.legend(['Epsilon Decay 0.05'])
-
 
 plt.show()

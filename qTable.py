@@ -6,6 +6,7 @@ from stateSpace import Action
 class Rewards():
 
     rewards_table = np.zeros(len(Action))
+    
     q_table = None
     epoch = 0
     iteration = 0
