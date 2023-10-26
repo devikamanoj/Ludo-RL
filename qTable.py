@@ -57,10 +57,10 @@ class Rewards():
         self.rewards_table[Action.HOME_GoalZone.value] = self.rewards_table[Action.SAFE_GoalZone.value] + VERY_BAD
         self.rewards_table[Action.HOME_Goal.value] = self.rewards_table[Action.SAFE_Goal.value] + VERY_BAD
 
-    def update_epsilon(self, new_epsilon):
+    def update_epsilon(self, new_epsilon): #update the epsilon greedy variable
         self.epsilon_greedy = new_epsilon
 
-    def get_state_action_of_array(self, value, array):
+    def get_state_action_of_array(self, value, array): #  takes a value and an array and returns a random state-action pair where the array matches the value
         if np.isnan(value):
             return (-1, -1)
         idx = np.where(array == value)
@@ -69,7 +69,8 @@ class Rewards():
         action = idx[1][random_idx]
         return (state, action)
 
-    def choose_next_action(self, player, action_table):
+    def choose_next_action(self, player, action_table):#choos the next action for the player based on the q-table and an action table
+        # It implements an epsilon-greedy strategy, where the agent chooses a random action with probability epsilon_greedy or selects the action with the highest Q-value.
         q_table_options = np.multiply(self.q_table, action_table)
     
         if random.uniform(0, 1) < self.epsilon_greedy:
@@ -89,6 +90,7 @@ class Rewards():
 
 
     def reward(self, state, new_action_table, action):
+        #calculates the reward for a given state-action pair and updates the Q-table based on the Q-learning algorithm. It computes the new Q-value for the state-action pair and updates the max_expected_reward attribute.
         state = int(state)
         action = int(action)
 
