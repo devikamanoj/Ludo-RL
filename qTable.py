@@ -5,29 +5,28 @@ import numpy as np
 from stateSpace import Action
 class Rewards():
 
-    rewards_table = np.zeros(len(Action))
-    
-    q_table = None
+    rewards_table = np.zeros(len(Action)) #created an array filled with zeros with length equal to the number of actions
+    q_table = None #used for storing q-values in the q-learning algorithm
     epoch = 0
     iteration = 0
 
-    def __init__(self, states, actions, epsilon=0.9, gamma=0.3, lr=0.2, learning=True):
-        super().__init__()
-        self.learning = learning
-        
-        self.q_table = np.zeros([states, actions])
+    def __init__(self, states, actions, epsilon=0.9, gamma=0.3, lr=0.2, learning=True): #defines constructor method for rewards
+        super().__init__() #to call the supreclass constructor
+        self.learning = learning # used to determine whether the agent is learning or not
+        self.q_table = np.zeros([states, actions]) #creates a q-table with the number of states and actions as zeros
+        self.epsilon_greedy = epsilon #epsilon is used to determine the probability of exploration vs exploitation in the decision making process
+        self.gamma = gamma #gamma is the discount factor used in the q-learning algorithm
+        self.lr = lr #learning rate used in the q-learning algorithm
 
-        self.epsilon_greedy = epsilon
-        self.gamma = gamma
-        self.lr = lr
-
-        self.max_expected_reward = 0
+        self.max_expected_reward = 0 #used to store the maximum expected reward for a given state
         
+        # Rewards table
         VERY_BAD = -0.8
         BAD = -0.4
         GOOD = 0.4
         VERY_GOOD = 1.2
 
+        # Rewards table for each move
         self.rewards_table[Action.SAFE_MoveOut.value] = 0.4
         self.rewards_table[Action.SAFE_MoveDice.value] = 0.01
         self.rewards_table[Action.SAFE_Goal.value] = 0.8
