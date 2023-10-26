@@ -120,8 +120,7 @@ gamma = 0.5
 epsilon = 0.9
 epsilon_decay_rate = 0.05
 episodes = 500
-no_of_players = 3
-# no_of_players = np.random.randint(1,4)
+no_of_players = np.random.randint(1,4)
 
 # Start teaching the agent
 win_rate_list, win_rate_ma, epsilon_list, max_expected_return_list, max_expected_return_list_ma = start_teaching_ai_agent(episodes, no_of_players, epsilon, epsilon_decay_rate, learning_rate, gamma)
